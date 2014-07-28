@@ -23,68 +23,35 @@ def get_connection(start, destination, verbose=0):
     dt = datetime.datetime.now()
     date = "%d.%d.%d" % (dt.day, dt.month, dt.year)
     time = "%d:%d" % (dt.hour, dt.minute)
-    query = ("http://mobile.bahn.de/bin/mobil/query.exe/dox" + "?" +
-             "n=1" + "&" +
-             "rt=1" + "&" +
-             "use_realtime_filter=1" + "&" +
-             "REQ0HafasOptimize1=0%3A1&REQ0HafasSearchForw=1" + "&" +
-             "REQ0JourneyDate=" + date + "&" +
-             "REQ0JourneyStopsS0A=1" + "&" +
-             "REQ0JourneyStopsS0G=" + start + "&" +
-             "REQ0JourneyStopsS0ID=" + "&" +
-             "REQ0JourneyStopsZ0A=1" + "&" +
-             "REQ0JourneyStopsZ0G=" + destination + "&" +
-             "REQ0JourneyStopsZ0ID=" + "&" +
-             "REQ0JourneyTime=" + time + "&" +
-             "REQ0Tariff_Class=2" + "&" +
-             "REQ0Tariff_TravellerAge.1=35" + "&" +
-             "REQ0Tariff_TravellerReductionClass.1=0" + "&" +
-             "REQ0Tariff_TravellerType.1=E" + "&" +
-             "existOptimizePrice=1" + "&" +
-             "existProductNahverkehr=yes" + "&" +
-             "immediateAvail=ON" + "&" +
+    query = ("http://mobile.bahn.de/bin/mobil/query.exe/dox?"
+             "n=1&"
+             "rt=1&"
+             "use_realtime_filter=1&"
+             "REQ0HafasOptimize1=0%3A1&REQ0HafasSearchForw=1&"
+             "REQ0JourneyDate=" + date + "&"
+             "REQ0JourneyStopsS0A=1&"
+             "REQ0JourneyStopsS0G=" + start + "&"
+             "REQ0JourneyStopsS0ID=&"
+             "REQ0JourneyStopsZ0A=1&"
+             "REQ0JourneyStopsZ0G=" + destination + "&"
+             "REQ0JourneyStopsZ0ID=&"
+             "REQ0JourneyTime=" + time + "&"
+             "REQ0Tariff_Class=2&"
+             "REQ0Tariff_TravellerAge.1=35&"
+             "REQ0Tariff_TravellerReductionClass.1=0&"
+             "REQ0Tariff_TravellerType.1=E&"
+             "existOptimizePrice=1&"
+             "existProductNahverkehr=yes&"
+             "immediateAvail=ON&"
              "start=Suchen")
     if verbose > 1:
-        print query
+        print(query)
     r = requests.post(query)
 
     html = r.text
     content = BeautifulSoup(html)
     table = content.body.find("table", attrs={"class": "ovTable clicktable"})
     haupt = content.body.find("div", attrs={"class": "haupt"})
-
-    """
-    import re
-    cells = [[cell for cell in row.findAll("td")]
-             for row in table.findAll("tr")]
-    cells = cells[2:-1]
-    results = []
-    for i, row in enumerate(cells):
-        if verbose:
-            print "row", i
-        result = {}
-        for j, cell in enumerate(row):
-            if j == 0:
-                s = re.sub(r"<a [a-zA-Z0-9=\":&;_\-$!\/\.\?\ ]*>", "", str(cell))
-                s = re.sub(r"</a>", "", s)
-                s = re.sub(r"<td [a-zA-Z0-9=\":&;_\-$!\/\.\?\ ]*>", "", s)
-                s = re.sub(r"</td>", "", s)
-                els = s.split("<br />")
-                result["start"] = els[0]
-                result["end"] = els[1]
-            else:
-                els = [str(el) for el in cell.contents if str(el) != "<br />"]
-                if j == 2:
-                    result["changes"] = int(els[0])
-                    result["duration"] = els[1]
-                elif j == 3:
-                    result["product"] = els[0]
-                    result["price"] = els[1].strip()
-            if verbose:
-                print "\tcell", j
-                print "\t\t", els
-        results.append(result)
-    """
 
     return str(haupt), str(table)
 
@@ -123,14 +90,13 @@ def get_weather(url):
     return results
 
 
-app = Flask(__name__)
-config = yaml.load(open("config.yaml", "r"))
-
-@app.route("/", methods=["GET"])
-def display():
-    template = Template(open("layout.html", "r").read())
-    content = template.render(config=config, get_connection=get_connection, get_weather=get_weather)
-    return content.decode("utf-8")
-
 if __name__ == '__main__':
+    app = Flask(__name__)
+    config = yaml.load(open("config.yaml", "r"))
+
+    @app.route("/", methods=["GET"])
+    def display():
+        template = Template(open("layout.html", "r").read())
+        content = template.render(config=config, get_connection=get_connection, get_weather=get_weather)
+        return content.decode("utf-8")
     app.run(debug=True)

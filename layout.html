@@ -9,6 +9,7 @@ body {
 </style>
 </head>
 <body>
+<h1>{{config["title"]}}</h1>
 <table width=800px>
 {%- for connection in config["connections"] recursive %}
 {% if loop.index % config["layout"]["columns"] == 1 %}
@@ -34,7 +35,8 @@ body {
     <td>{{ day["temperature"] }}</td>
 </tr>
 <tr>
-    <td colspan=2>{{ day["text"] }}</td>
+    <td>Description</td>
+    <td>{{ day["text"] }}</td>
 </tr>
 {%- for i in range(4) recursive %}
 <tr>
