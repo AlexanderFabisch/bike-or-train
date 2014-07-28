@@ -5,7 +5,6 @@
 # Dependencies:
 # * requests
 # * beautifulsoup
-# * tornado
 # * jinja
 # * flask
 
