@@ -7,6 +7,7 @@
 # * beautifulsoup
 # * tornado
 # * jinja
+# * flask
 
 import sys
 import requests

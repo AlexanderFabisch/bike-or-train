@@ -1,0 +1,20 @@
+title: Personal Monitor
+
+layout:
+    columns: 3
+
+connections:
+    - name: Uni - Hbf
+      start: Klagenfurter Strasse, Bremen
+      destination: Bremen Hauptbahnhof
+
+    - name: Uni - Home
+      start: Klagenfurter Strasse, Bremen
+      destination: Am Dobben, Bremen
+
+    - name: Home - Hbf
+      start: Am Dobben, Bremen
+      destination: Bremen Hauptbahnhof
+
+weather:
+    url: http://www.wetter.de/deutschland/wetter-bremen-18220609.html
