@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+<title>{{config["title"]}}</title>
+<style>
+body {
+    font-size: 8pt
+};
+</style>
+</head>
+<body>
+<table width=800px>
+{%- for connection in config["connections"] recursive %}
+{% if loop.index % config["layout"]["columns"] == 1 %}
+<tr>
+{% endif %}
+    <td valign="top">
+        <div style="BACKGROUND-COLOR: #FF6600"><p>{{ connection["name"] }}</p></div>
+        {{ "\n".join(get_connection(connection["start"], connection["destination"])) }}
+    </td>
+{% if loop.index % config["layout"]["columns"] == 0 %}
+</tr>
+{% endif %}
+{%- endfor %}
+</table>
+<table width=800px>
+{%- for day in get_weather(config["weather"]["url"]) recursive %}
+<tr bgcolor=#FF6600>
+    <td>Day</td>
+    <td>{{ day["date"] }}</td>
+</tr>
+<tr>
+    <td>Temperature</td>
+    <td>{{ day["temperature"] }}</td>
+</tr>
+<tr>
+    <td colspan=2>{{ day["text"] }}</td>
+</tr>
+{%- for i in range(4) recursive %}
+<tr>
+    <td>{{ day["times"][i] }} Uhr:</td>
+    <td>{{ day["temps"][i] }}, {{ day["rains"][i] }} Regenwahrscheinlichkeit; {{ day["conditions"][i] }}, {{ day["winds"][i] }}</td>
+</tr>
+{%- endfor %}
+{%- endfor %}
+<table>
+</body>
+</html>
