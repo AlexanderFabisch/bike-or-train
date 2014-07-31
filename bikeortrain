@@ -1,3 +1,5 @@
+#! /home/afabisch/anaconda/bin/python
+
 # Ressources:
 # * https://github.com/marcusschiesser/openbahn-api/blob/master/openbahn-api/src/de/marcusschiesser/dbpendler/server/bahnwrapper/ConnectionParser.java
 # * https://github.com/yncyrydybyl/ride2go/blob/master/src/connectors/bahn.de.coffee
@@ -11,8 +13,10 @@
 import sys
 import requests
 import datetime
+from functools import wraps
 from BeautifulSoup import BeautifulSoup
-from flask import Flask
+from flask import Flask, request, Response
+from werkzeug import check_password_hash
 from jinja2 import Template
 import yaml
 reload(sys)
@@ -90,13 +94,38 @@ def get_weather(url):
     return results
 
 
+def check_auth(username, password):
+    return check_password_hash(open("pw.hash", "r").read(), password)
+
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    return Response(
+    'Could not verify your access level for that URL.\n'
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+
 if __name__ == '__main__':
     app = Flask(__name__)
     config = yaml.load(open("config.yaml", "r"))
+    template = Template(open("layout.html", "r").read())
 
     @app.route("/", methods=["GET"])
+    @requires_auth
     def display():
-        template = Template(open("layout.html", "r").read())
-        content = template.render(config=config, get_connection=get_connection, get_weather=get_weather)
+        content = template.render(config=config, get_connection=get_connection,
+                                  get_weather=get_weather)
         return content.decode("utf-8")
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=False)
+
